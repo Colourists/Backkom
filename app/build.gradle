@@ -1,0 +1,86 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        release {
+            storeFile file('E:\\MyCode\\Backkom\\key.jks')
+            storePassword '123456'
+            keyAlias = 'key0'
+            keyPassword '123456'
+        }
+        debug {
+            storeFile file('E:\\MyCode\\Backkom\\key.jks')
+            storePassword '123456'
+            keyAlias = 'key0'
+            keyPassword '123456'
+        }
+    }
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    defaultConfig {
+        applicationId "com.example.backkom"
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+        signingConfig signingConfigs.release
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+}
+
+apply from: 'tinkerpatch.gradle'
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+// 测试使用
+    testImplementation rootProject.ext.dependencies["junit"]
+    androidTestImplementation rootProject.ext.dependencies["runner"]
+    androidTestImplementation rootProject.ext.dependencies["espresso-core"]
+    //基类依赖library
+    implementation project(path: ':baselibrary')
+    //组件library
+    if (!rootProject.ext.isZhiHuApplication) {
+        implementation project(path: ':zhihulibrary')
+    }
+    if (!rootProject.ext.isKotlinApplication) {
+        implementation project(path: ':kotlinlibrary')
+    }
+    annotationProcessor rootProject.ext.dependencies["router-compiler"]
+
+    annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:3.0.1"
+//    //可选，用于生成application类
+//    provided('com.tencent.tinker:tinker-android-anno:1.9.1')
+//    //tinker的核心库
+//    compile('com.tencent.tinker:tinker-android-lib:1.9.1')
+    //tinker的核心库
+//    implementation("com.tencent.tinker:tinker-android-lib:1.9.1") { changing = true }
+//    //可选，用于生成application类
+//    annotationProcessor("com.tencent.tinker:tinker-android-anno:1.9.1") { changing = true }
+//    compileOnly("com.tencent.tinker:tinker-android-anno:1.9.1") { changing = true }
+    //无需引入tinker的任何库,使用tinkerpatch sdk即可
+    implementation("com.tinkerpatch.sdk:tinkerpatch-android-sdk:1.2.13")
+//    implementation project(path: ':zhihulibrary')
+//    implementation project(path: ':kotlinlibrary')
+    // 若使用annotation需要单独引用,对于tinker的其他库都无需再引用
+//    compileOnly("com.tinkerpatch.tinker:tinker-android-anno:1.9.13")
+//    compile('com.github.hotchemi:permissionsdispatcher:3.1.0') { exclude module: 'support-v13' }
+//    kapt 'com.github.hotchemi:permissionsdispatcher-processor:3.1.0'
+}
